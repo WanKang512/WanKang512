@@ -1,5 +1,22 @@
-// import { Entity,PrimaryKey,Property,SerializedPrimaryKey } from "@mikro-orm/core"
+import { Entity, PrimaryKey, Property, SerializedPrimaryKey } from '@mikro-orm/core'
+import { ObjectId } from '@mikro-orm/mongodb'
+import { Field, InterfaceType } from 'type-graphql'
 
-// import {ObjectId} from '@mikro-orm/mongodb'
+@InterfaceType()
+@Entity({ abstract: true })
+export abstract class MongoClass {
+	@PrimaryKey()
+	readonly _id!: ObjectId
 
-// import {Field,InterFaceType} from 'type-graphql'
+	@Field()
+	@SerializedPrimaryKey()
+	id!: string
+
+	@Field(() => String)
+	@Property({ type: 'date' })
+	createAt = new Date()
+
+	@Field(() => String)
+	@Property({ type: 'date', onUpdate: () => new Date() })
+	updateAt = new Date()
+}

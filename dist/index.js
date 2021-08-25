@@ -13,9 +13,9 @@ app.post('/', (req, res) => {
     console.log(req.body);
     res.json({ status: 'success', code: '200', message: 'complete!' });
 });
-app.listen('3001', () => {
+app.listen('3003', () => {
     console.log('233333');
 });
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3003;
 app.listen(PORT);
 //# sourceMappingURL=index.js.map

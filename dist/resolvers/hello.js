@@ -9,20 +9,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Post = void 0;
-const core_1 = require("@mikro-orm/core");
+exports.HelloResolver = void 0;
 const type_graphql_1 = require("type-graphql");
-const MongoClass_1 = require("./MongoClass");
-let Post = class Post extends MongoClass_1.MongoClass {
+let HelloResolver = class HelloResolver {
+    hello() {
+        return 'wankang';
+    }
 };
 __decorate([
-    type_graphql_1.Field(),
-    core_1.Property({}),
-    __metadata("design:type", String)
-], Post.prototype, "title", void 0);
-Post = __decorate([
-    type_graphql_1.ObjectType({ implements: MongoClass_1.MongoClass }),
-    core_1.Entity()
-], Post);
-exports.Post = Post;
-//# sourceMappingURL=Post.js.map
+    type_graphql_1.Query(() => String),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], HelloResolver.prototype, "hello", null);
+HelloResolver = __decorate([
+    type_graphql_1.Resolver()
+], HelloResolver);
+exports.HelloResolver = HelloResolver;
+//# sourceMappingURL=hello.js.map

@@ -1,10 +1,11 @@
 import { Entity, Property } from '@mikro-orm/core'
-//  import {MongoClass} from './MongoClass'
-import { Field } from 'type-graphql'
+import { Field, ObjectType } from 'type-graphql'
+import { MongoClass } from './MongoClass'
 
+@ObjectType({ implements: MongoClass })
 @Entity()
 export class Post extends MongoClass {
 	@Field()
-	@Property({ type: 'text' })
+	@Property({})
 	title!: string
 }
