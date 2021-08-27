@@ -1,20 +1,47 @@
+import { MikroORM } from '@mikro-orm/core'
+import { ApolloServer } from 'apollo-server-express'
+import cors from 'cors'
 import dotenv from 'dotenv'
-import express, { Request, Response } from 'express'
+import express from 'express'
 import path from 'path'
+import { buildSchema } from 'type-graphql'
+import { Order } from './entities/Order'
+import { Post } from './entities/Post'
+import { User } from './entities/User'
+import { HelloResolver } from './resolvers/hello'
+import { PostResolver } from './resolvers/post'
 
-const app = express()
-
-app.use(express.json())
 dotenv.config({ path: path.join(__dirname, '..', '.env') })
 
-app.post('/', (req: Request, res: Response) => {
-	console.log(req.body)
-	res.json({ status: 'success', code: '200', message: 'complete!' })
-})
+const main = async () => {
+	const app = express()
+	const orm = await MikroORM.init({
+		entities: [Post, User, Order],
+		type: 'mongo',
+		clientUrl: process.env.MONGODB,
+		debug: true,
+	})
+	app.use(cors())
 
-app.listen('3003', () => {
-	console.log('233333')
-})
+	const apolloServer = new ApolloServer({
+		schema: await buildSchema({
+			resolvers: [PostResolver, HelloResolver],
+			validate: false,
+		}),
+		context: ({ req, res }) => ({ em: orm.em, req, res }),
+	})
+	apolloServer.applyMiddleware({ app, cors: false })
 
-const PORT = process.env.PORT || 3003
-app.listen(PORT)
+	app.listen(5000, () => {
+		console.log(233333)
+	})
+
+	console.log(123)
+	const createData = orm.em.create(Post, { title: 'Wan' })
+	await orm.em.persistAndFlush(createData)
+
+	const posts = await orm.em.find(Post, {})
+	console.log(posts)
+}
+
+main()
