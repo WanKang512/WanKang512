@@ -12,5 +12,7 @@ export declare type Mycontext = {
     res: Response;
     redis: Redis;
 };
-declare const _default: import("@mikro-orm/core").Options<IDatabaseDriver<Connection>> | import("@mikro-orm/core").Configuration<IDatabaseDriver<Connection>> | undefined;
+declare const EntityName: readonly ["Post", "User", "Order"];
+export declare type EntityName = typeof EntityName[number];
+declare const _default: import("@mikro-orm/core").Configuration<IDatabaseDriver<Connection>> | import("@mikro-orm/core").Options<IDatabaseDriver<Connection>> | undefined;
 export default _default;

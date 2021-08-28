@@ -11,6 +11,7 @@ const Order_1 = require("./entities/Order");
 const Post_1 = require("./entities/Post");
 const User_1 = require("./entities/User");
 dotenv_1.default.config({ path: path_1.default.join(__dirname, '..', '.env') });
+const EntityName = ['Post', 'User', 'Order'];
 exports.default = {
     metadataProvider: reflection_1.TsMorphMetadataProvider,
     type: 'mongo',

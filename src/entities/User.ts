@@ -7,7 +7,7 @@ import { Post } from './Post'
 @InputType()
 export class adminUserInput {
 	@Field()
-	username: string
+	username?: string
 
 	@Field()
 	password?: string
@@ -28,7 +28,7 @@ export class User extends MongoClass {
 
 	@Field(() => String)
 	@Property({})
-	phoneCode!: 'USER'
+	phoneCode!: string
 
 	@Field(() => Float)
 	@Property()

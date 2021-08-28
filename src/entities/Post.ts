@@ -4,7 +4,7 @@ import { MongoClass } from './MongoClass'
 import { User } from './User'
 
 @InputType()
-export class adminPostInput {
+export class adminUserInput {
 	@Field()
 	title: string
 }
@@ -19,3 +19,15 @@ export class Post extends MongoClass {
 	@ManyToOne(() => User)
 	creator!: User
 }
+
+// import { Entity, Property } from '@mikro-orm/core'
+// import { Field, ObjectType } from 'type-graphql'
+// import { MongoClass } from './MongoClass'
+
+// @ObjectType({ implements: MongoClass })
+// @Entity()
+// export class Post extends MongoClass {
+// 	@Field()
+// 	@Property()
+// 	title!: string
+// }

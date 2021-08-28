@@ -24,12 +24,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostResolver = void 0;
 const type_graphql_1 = require("type-graphql");
 const Post_1 = require("../entities/Post");
+const User_1 = require("../entities/User");
 let PostResolver = class PostResolver {
-    posts({ em }) {
-        return em.find(Post_1.Post, {});
+    creator(post, { em }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield em.findOne(User_1.User, { id: post.creator.id });
+            return user;
+        });
     }
     post({ em }, id) {
-        return em.findOne(Post_1.Post, { id });
+        const post = em.findOne(Post_1.Post, { id });
+        return post;
     }
     createPost({ em }, title) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -40,12 +45,13 @@ let PostResolver = class PostResolver {
     }
 };
 __decorate([
-    type_graphql_1.Query(() => [Post_1.Post]),
-    __param(0, type_graphql_1.Ctx()),
+    type_graphql_1.FieldResolver(() => User_1.User),
+    __param(0, type_graphql_1.Root()),
+    __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Post_1.Post, Object]),
     __metadata("design:returntype", Promise)
-], PostResolver.prototype, "posts", null);
+], PostResolver.prototype, "creator", null);
 __decorate([
     type_graphql_1.Query(() => Post_1.Post, { nullable: true }),
     __param(0, type_graphql_1.Ctx()),

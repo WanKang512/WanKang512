@@ -24,6 +24,7 @@ const Post_1 = require("./entities/Post");
 const User_1 = require("./entities/User");
 const hello_1 = require("./resolvers/hello");
 const post_1 = require("./resolvers/post");
+const user_1 = require("./resolvers/user");
 dotenv_1.default.config({ path: path_1.default.join(__dirname, '..', '.env') });
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = express_1.default();
@@ -36,7 +37,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     app.use(cors_1.default());
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: yield type_graphql_1.buildSchema({
-            resolvers: [post_1.PostResolver, hello_1.HelloResolver],
+            resolvers: [post_1.PostResolver, hello_1.HelloResolver, user_1.UserResolver],
             validate: false,
         }),
         context: ({ req, res }) => ({ em: orm.em, req, res }),
@@ -45,11 +46,6 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     app.listen(5000, () => {
         console.log(233333);
     });
-    console.log(123);
-    const createData = orm.em.create(Post_1.Post, { title: 'Wan' });
-    yield orm.em.persistAndFlush(createData);
-    const posts = yield orm.em.find(Post_1.Post, {});
-    console.log(posts);
 });
 main();
 //# sourceMappingURL=index.js.map

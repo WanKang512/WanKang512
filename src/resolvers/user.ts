@@ -1,19 +1,20 @@
+import bcrypt from 'bcryptjs'
 import {
 	Arg,
 	Ctx,
 	Field,
-	FieldResolver,
 	InputType,
-	Int,
+	Mutation,
 	ObjectType,
-	Root,
+	Resolver,
 } from 'type-graphql'
-import { Post } from '../entities/Post'
 import { User } from '../entities/User'
 import { Mycontext } from '../mikro-orm.config'
+import { isPhone } from '../utls/isPhone'
+import { setAuth } from '../utls/setAuth'
 
 @InputType()
-class PhonePasswordInput {
+class PasswordInput {
 	@Field()
 	username: string
 	@Field()
@@ -42,7 +43,7 @@ export class UserResponse {
 	static createError(field: string, message: string) {
 		return {
 			user: undefined,
-			errors: [
+			error: [
 				{
 					field,
 					message,
@@ -51,22 +52,66 @@ export class UserResponse {
 		}
 	}
 }
-@ObjectType()
+@Resolver(User)
 export class UserResolver {
-	@FieldResolver(() => [Post])
-	async posts(
-		@Root() user: User,
+	@Mutation(() => UserResponse)
+	async phoneLoginOrRegister(
+		@Ctx() { em, redis, req }: Mycontext,
+		@Arg('options') options: PhoneTokenInput,
+		@Arg('password', { nullable: true }) password?: string
+	): Promise<UserResponse> {
+		const { username, token } = options
+		if (!isPhone(username) || !token) {
+			return UserResponse.createError('phone', '出错了')
+		}
+		const valiphone = await redis.get(process.env.PHONE_PREFIX + token)
+		if (!valiphone || valiphone !== username) {
+			return UserResponse.createError('token', '验证码错误')
+		}
+		redis.del(process.env.PHONE_PREFIX + token)
+		const user = await em.findOne(User, { username })
+		if (!user) {
+			const salt = await bcrypt.genSalt(10)
+			let newUser: User
+
+			if (password) {
+				const hashedPassword = await bcrypt.hash(password, salt)
+				newUser = em.create(User, {
+					username: options.username,
+					password: hashedPassword,
+				})
+			} else {
+				newUser = em.create(User, { username: options.username })
+			}
+			await em.persistAndFlush(newUser)
+
+			setAuth(req.session, newUser)
+			return { user: newUser }
+		}
+		await em.persistAndFlush(user)
+
+		setAuth(req.session, user)
+
+		return { user }
+	}
+
+	@Mutation(() => UserResponse)
+	async createUser(
 		@Ctx() { em }: Mycontext,
-		@Arg('limit', () => Int, { nullable: true }) limit?: number,
-		@Arg('offset', () => Int, { nullable: true }) offset?: number
-	) {
-		const posts = await usePagination(
-			em,
-			'Post',
-			{ creator: user.id },
-			limit,
-			offset
-		)
-		return posts
+		@Arg('options') options: PasswordInput
+	): Promise<UserResponse> {
+		const { username, password } = options
+		if (!password) {
+			return UserResponse.createError('password', '请输入密码')
+		}
+		const user = await em.findOne(User, { username })
+		if (!user) {
+			return UserResponse.createError('username', '查无此用户')
+		}
+		// if (!phoneCode) {
+		// 	return UserResponse.createError('phoneCode', '手机注册用户请用手机验证码登陆')
+		// }
+		// setAuth(req.session, user)
+		return { user }
 	}
 }

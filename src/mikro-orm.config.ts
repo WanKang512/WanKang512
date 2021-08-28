@@ -29,11 +29,11 @@ export type Mycontext = {
 	redis: Redis
 }
 // export const entities = [Post, User, Order]
-// const EntityName = ['Post', 'User', 'Order'] as const
+const EntityName = ['Post', 'User', 'Order'] as const
 // export type Items = typeof entities[number]
 // export type ItemInstance = InstanceType<Items>
 
-// export type EntityName = typeof EntityName[number]
+export type EntityName = typeof EntityName[number]
 
 export default {
 	metadataProvider: TsMorphMetadataProvider,

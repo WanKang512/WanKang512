@@ -10,6 +10,7 @@ import { Post } from './entities/Post'
 import { User } from './entities/User'
 import { HelloResolver } from './resolvers/hello'
 import { PostResolver } from './resolvers/post'
+import { UserResolver } from './resolvers/user'
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') })
 
@@ -25,7 +26,7 @@ const main = async () => {
 
 	const apolloServer = new ApolloServer({
 		schema: await buildSchema({
-			resolvers: [PostResolver, HelloResolver],
+			resolvers: [PostResolver, HelloResolver, UserResolver],
 			validate: false,
 		}),
 		context: ({ req, res }) => ({ em: orm.em, req, res }),
@@ -36,12 +37,13 @@ const main = async () => {
 		console.log(233333)
 	})
 
-	console.log(123)
-	const createData = orm.em.create(Post, { title: 'Wan' })
-	await orm.em.persistAndFlush(createData)
-
-	const posts = await orm.em.find(Post, {})
-	console.log(posts)
+	// console.log(123)
+	// const createData = orm.em.create(Post, { title: 'Wan' })
+	// await orm.em.persistAndFlush(createData)
+	// const createUser = orm.em.create(User, { username: 'Wan', password: '123456' })
+	// await orm.em.persistAndFlush(createUser)
+	// const posts = await orm.em.find(Post, {})
+	// console.log(posts)
 }
 
 main()

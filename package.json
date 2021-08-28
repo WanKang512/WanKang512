@@ -23,6 +23,7 @@
 		"@mikro-orm/mongodb": "^4.5.7",
 		"@mikro-orm/reflection": "^4.5.9",
 		"apollo-server-express": "^2",
+		"bcryptjs": "^2.4.3",
 		"connect-redis": "^6.0.0",
 		"cors": "^2.8.5",
 		"express": "^4.17.1",

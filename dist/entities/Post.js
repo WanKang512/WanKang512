@@ -9,21 +9,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Post = exports.adminPostInput = void 0;
+exports.Post = exports.adminUserInput = void 0;
 const core_1 = require("@mikro-orm/core");
 const type_graphql_1 = require("type-graphql");
 const MongoClass_1 = require("./MongoClass");
 const User_1 = require("./User");
-let adminPostInput = class adminPostInput {
+let adminUserInput = class adminUserInput {
 };
 __decorate([
     type_graphql_1.Field(),
     __metadata("design:type", String)
-], adminPostInput.prototype, "title", void 0);
-adminPostInput = __decorate([
+], adminUserInput.prototype, "title", void 0);
+adminUserInput = __decorate([
     type_graphql_1.InputType()
-], adminPostInput);
-exports.adminPostInput = adminPostInput;
+], adminUserInput);
+exports.adminUserInput = adminUserInput;
 let Post = class Post extends MongoClass_1.MongoClass {
 };
 __decorate([

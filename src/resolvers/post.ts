@@ -1,20 +1,40 @@
-import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import {
+	Arg,
+	Ctx,
+	FieldResolver,
+	Mutation,
+	Query,
+	Resolver,
+	Root,
+} from 'type-graphql'
 import { Post } from '../entities/Post'
+import { User } from '../entities/User'
 import { Mycontext } from '../mikro-orm.config'
 
 @Resolver(Post)
 export class PostResolver {
-	@Query(() => [Post])
-	posts(@Ctx() { em }: Mycontext): Promise<Post[]> {
-		return em.find(Post, {})
+	@FieldResolver(() => User)
+	async creator(@Root() post: Post, @Ctx() { em }: Mycontext) {
+		const user = await em.findOne(User, { id: post.creator.id })
+		return user
 	}
+
+	// @Query(() => [Post])
+	// posts(
+	// 	@Ctx() { em }: Mycontext,
+	// 	@Arg('limit', () => Int, { nullable: true }) limit?: number,
+	// 	@Arg('offset', () => Int, { nullable: true }) offset?: number
+	// ) {
+	// 	return usePagination(em, 'Post', {}, limit, offset)
+	// }
 
 	@Query(() => Post, { nullable: true })
 	post(
 		@Ctx() { em }: Mycontext,
 		@Arg('id', () => String) id: string
 	): Promise<Post | null> {
-		return em.findOne(Post, { id })
+		const post = em.findOne(Post, { id })
+		return post
 	}
 
 	@Mutation(() => Post, { nullable: true })
