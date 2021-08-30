@@ -13,7 +13,7 @@ export class adminUserInput {
 	password?: string
 
 	@Field()
-	phoneCode?: string
+	role?: string
 }
 
 @ObjectType({ implements: MongoClass })
@@ -28,7 +28,7 @@ export class User extends MongoClass {
 
 	@Field(() => String)
 	@Property({})
-	phoneCode!: string
+	role!: 'USER'
 
 	@Field(() => Float)
 	@Property()

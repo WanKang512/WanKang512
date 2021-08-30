@@ -20,27 +20,27 @@ let MongoClass = class MongoClass {
     }
 };
 __decorate([
-    core_1.PrimaryKey(),
+    (0, core_1.PrimaryKey)(),
     __metadata("design:type", mongodb_1.ObjectId)
 ], MongoClass.prototype, "_id", void 0);
 __decorate([
-    type_graphql_1.Field(),
-    core_1.SerializedPrimaryKey(),
+    (0, type_graphql_1.Field)(),
+    (0, core_1.SerializedPrimaryKey)(),
     __metadata("design:type", String)
 ], MongoClass.prototype, "id", void 0);
 __decorate([
-    type_graphql_1.Field(() => String),
-    core_1.Property({ type: 'date' }),
+    (0, type_graphql_1.Field)(() => String),
+    (0, core_1.Property)({ type: 'date' }),
     __metadata("design:type", Object)
 ], MongoClass.prototype, "createAt", void 0);
 __decorate([
-    type_graphql_1.Field(() => String),
-    core_1.Property({ type: 'date', onUpdate: () => new Date() }),
+    (0, type_graphql_1.Field)(() => String),
+    (0, core_1.Property)({ type: 'date', onUpdate: () => new Date() }),
     __metadata("design:type", Object)
 ], MongoClass.prototype, "updateAt", void 0);
 MongoClass = __decorate([
-    type_graphql_1.InterfaceType(),
-    core_1.Entity({ abstract: true })
+    (0, type_graphql_1.InterfaceType)(),
+    (0, core_1.Entity)({ abstract: true })
 ], MongoClass);
 exports.MongoClass = MongoClass;
 //# sourceMappingURL=MongoClass.js.map

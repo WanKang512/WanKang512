@@ -3,18 +3,25 @@ import {
 	Arg,
 	Ctx,
 	Field,
+	FieldResolver,
 	InputType,
+	Int,
 	Mutation,
 	ObjectType,
+	Query,
 	Resolver,
+	Root,
 } from 'type-graphql'
+import { Post } from '../entities/Post'
 import { User } from '../entities/User'
 import { Mycontext } from '../mikro-orm.config'
 import { isPhone } from '../utls/isPhone'
+import { usePagination } from '../utls/pagination'
+import { sendSMSToken } from '../utls/sendSms'
 import { setAuth } from '../utls/setAuth'
 
 @InputType()
-class PasswordInput {
+class PhonePasswordInput {
 	@Field()
 	username: string
 	@Field()
@@ -54,6 +61,69 @@ export class UserResponse {
 }
 @Resolver(User)
 export class UserResolver {
+	@FieldResolver(() => [Post])
+	async posts(
+		@Root() user: User,
+		@Ctx() { em }: Mycontext,
+		@Arg('limit', () => Int, { nullable: true }) limit?: number,
+		@Arg('offset', () => Int, { nullable: true }) offset?: number
+	) {
+		const posts = await usePagination(
+			em,
+			'Post',
+			{ creator: user.id },
+			limit,
+			offset
+		)
+		return posts
+	}
+	@FieldResolver(() => [Post])
+	async order(
+		@Root() user: User,
+		@Ctx() { em }: Mycontext,
+		@Arg('limit', () => Int, { nullable: true }) limit?: number,
+		@Arg('offset', () => Int, { nullable: true }) offset?: number
+	) {
+		const orders = await usePagination(em, 'Order', { user: user.id }, limit, offset)
+		return orders
+	}
+
+	@Mutation(() => UserResponse)
+	async sendToken(
+		@Arg('username') username: string,
+		@Ctx() { redis }: Mycontext
+	): Promise<UserResponse> {
+		const token = new Array(6)
+			.fill(null)
+			.map(() => Math.floor(Math.random() * 9 + 1))
+			.join('')
+		const toShort = await redis.get(
+			process.env.PHONE_TOKEN_AT_TIME_PREFIX + username
+		)
+
+		if (toShort) {
+			return UserResponse.createError('username', '发送太频繁')
+		}
+		await redis.set(
+			process.env.PHONE_TOKEN_AT_TIME_PREFIX + username,
+			123,
+			'EX',
+			parseInt(process.env.PHONE_TOKEN_FREQUENCY_SECONDS)
+		)
+
+		const setResult = await redis.set(
+			process.env.PHONE_PREFIX + token,
+			username,
+			'EX',
+			parseInt(process.env.PHONE_TOKEN_EXPIRE_SECONDS)
+		)
+		if (setResult !== 'OK') {
+			return UserResponse.createError('username', '服务器出错')
+		}
+		await sendSMSToken({ username, smsToken: token })
+		return UserResponse.createError('username', '发送成功')
+	}
+
 	@Mutation(() => UserResponse)
 	async phoneLoginOrRegister(
 		@Ctx() { em, redis, req }: Mycontext,
@@ -62,7 +132,7 @@ export class UserResolver {
 	): Promise<UserResponse> {
 		const { username, token } = options
 		if (!isPhone(username) || !token) {
-			return UserResponse.createError('phone', '出错了')
+			return UserResponse.createError('username', '出错了')
 		}
 		const valiphone = await redis.get(process.env.PHONE_PREFIX + token)
 		if (!valiphone || valiphone !== username) {
@@ -97,8 +167,8 @@ export class UserResolver {
 
 	@Mutation(() => UserResponse)
 	async createUser(
-		@Ctx() { em }: Mycontext,
-		@Arg('options') options: PasswordInput
+		@Ctx() { em, req }: Mycontext,
+		@Arg('options') options: PhonePasswordInput
 	): Promise<UserResponse> {
 		const { username, password } = options
 		if (!password) {
@@ -108,10 +178,41 @@ export class UserResolver {
 		if (!user) {
 			return UserResponse.createError('username', '查无此用户')
 		}
-		// if (!phoneCode) {
-		// 	return UserResponse.createError('phoneCode', '手机注册用户请用手机验证码登陆')
+		if (!user.password) {
+			return UserResponse.createError('phone', '手机注册用户请用手机验证码登陆')
+		}
+
+		// const valid = await bcrypt.compare(password, user.password)
+		// if (!valid) {
+		// 	return UserResponse.createError('password', '密码错误')
 		// }
-		// setAuth(req.session, user)
+		setAuth(req.session, user)
 		return { user }
+	}
+
+	@Query(() => User, { nullable: true })
+	async me(@Ctx() { req, em }: Mycontext): Promise<User | null> {
+		if (!req.session.userId) {
+			return null
+		}
+		const user = await em.findOne(User, { id: req.session.userId })
+		if (!user) {
+			return null
+		}
+		return user
+	}
+	@Mutation(() => Boolean)
+	async logout(@Ctx() { req, res }: Mycontext): Promise<boolean> {
+		return new Promise((resolve) => {
+			req.session.destroy((err) => {
+				if (err) {
+					console.log(err)
+					resolve(false)
+					return
+				}
+				res.clearCookie(process.env.COOKIE_NAME)
+				resolve(true)
+			})
+		})
 	}
 }

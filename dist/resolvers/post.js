@@ -25,12 +25,17 @@ exports.PostResolver = void 0;
 const type_graphql_1 = require("type-graphql");
 const Post_1 = require("../entities/Post");
 const User_1 = require("../entities/User");
+const isAuth_1 = require("../middleware/isAuth");
+const pagination_1 = require("../utls/pagination");
 let PostResolver = class PostResolver {
     creator(post, { em }) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield em.findOne(User_1.User, { id: post.creator.id });
             return user;
         });
+    }
+    posts({ em }, limit, offset) {
+        return (0, pagination_1.usePagination)(em, 'Post', {}, limit, offset);
     }
     post({ em }, id) {
         const post = em.findOne(Post_1.Post, { id });
@@ -43,33 +48,77 @@ let PostResolver = class PostResolver {
             return post;
         });
     }
+    updatePost({ em }, id, title) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const post = yield em.findOne(Post_1.Post, { id });
+            if (!post) {
+                return null;
+            }
+            post.title = title;
+            yield em.persistAndFlush(post);
+            return post;
+        });
+    }
+    deletePost({ em }, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield em.nativeDelete(Post_1.Post, { id });
+            return true;
+        });
+    }
 };
 __decorate([
-    type_graphql_1.FieldResolver(() => User_1.User),
-    __param(0, type_graphql_1.Root()),
-    __param(1, type_graphql_1.Ctx()),
+    (0, type_graphql_1.FieldResolver)(() => User_1.User),
+    __param(0, (0, type_graphql_1.Root)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Post_1.Post, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "creator", null);
 __decorate([
-    type_graphql_1.Query(() => Post_1.Post, { nullable: true }),
-    __param(0, type_graphql_1.Ctx()),
-    __param(1, type_graphql_1.Arg('id', () => String)),
+    (0, type_graphql_1.Query)(() => [Post_1.Post]),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)('limit', () => type_graphql_1.Int, { nullable: true })),
+    __param(2, (0, type_graphql_1.Arg)('offset', () => type_graphql_1.Int, { nullable: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Number, Number]),
+    __metadata("design:returntype", void 0)
+], PostResolver.prototype, "posts", null);
+__decorate([
+    (0, type_graphql_1.Query)(() => Post_1.Post, { nullable: true }),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)('id', () => String)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "post", null);
 __decorate([
-    type_graphql_1.Mutation(() => Post_1.Post, { nullable: true }),
-    __param(0, type_graphql_1.Ctx()),
-    __param(1, type_graphql_1.Arg('title', () => String)),
+    (0, type_graphql_1.UseMiddleware)((0, isAuth_1.isAuth)()),
+    (0, type_graphql_1.Mutation)(() => Post_1.Post, { nullable: true }),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)('title', () => String)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "createPost", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Post_1.Post, { nullable: true }),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)('id')),
+    __param(2, (0, type_graphql_1.Arg)('title', () => String, { nullable: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], PostResolver.prototype, "updatePost", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Arg)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], PostResolver.prototype, "deletePost", null);
 PostResolver = __decorate([
-    type_graphql_1.Resolver(Post_1.Post)
+    (0, type_graphql_1.Resolver)(Post_1.Post)
 ], PostResolver);
 exports.PostResolver = PostResolver;
 //# sourceMappingURL=post.js.map
