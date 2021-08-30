@@ -15,7 +15,6 @@ import {
 import { Post } from '../entities/Post'
 import { User } from '../entities/User'
 import { Mycontext } from '../mikro-orm.config'
-import { isPhone } from '../utls/isPhone'
 import { usePagination } from '../utls/pagination'
 import { sendSMSToken } from '../utls/sendSms'
 import { setAuth } from '../utls/setAuth'
@@ -131,7 +130,8 @@ export class UserResolver {
 		@Arg('password', { nullable: true }) password?: string
 	): Promise<UserResponse> {
 		const { username, token } = options
-		if (!isPhone(username) || !token) {
+		// if (!isPhone(username) || !token) {
+		if (!token) {
 			return UserResponse.createError('username', '出错了')
 		}
 		const valiphone = await redis.get(process.env.PHONE_PREFIX + token)
